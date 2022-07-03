@@ -9,7 +9,7 @@ import (
 
 type Lexer struct {
 	input string
-	ch rune
+	ch    rune
 }
 
 func New(input string) *Lexer {
@@ -23,7 +23,7 @@ func (l *Lexer) readChar() (ret rune) {
 		r, size := utf8.DecodeRuneInString(l.input)
 		ret = l.ch
 		l.ch = r
-		l.input = l.input[size:]		
+		l.input = l.input[size:]
 	} else {
 		l.ch = 0
 	}
@@ -31,21 +31,28 @@ func (l *Lexer) readChar() (ret rune) {
 	return ret
 }
 
-func (l* Lexer) readIdentifier() (ret string) {
+func (l *Lexer) peekChar() (ret rune) {
+	if len(l.input) > 0 {
+		ret, _ = utf8.DecodeRuneInString(l.input)
+	}
+	return
+}
+
+func (l *Lexer) readIdentifier() (ret string) {
 	for unicode.IsLetter(l.ch) {
 		ret += string(l.readChar())
 	}
 	return
 }
 
-func (l* Lexer) readNumber() (ret string) {
+func (l *Lexer) readNumber() (ret string) {
 	for unicode.IsNumber(l.ch) {
 		ret += string(l.readChar())
 	}
 	return
 }
 
-func (l* Lexer) skipWhiteSpace() {
+func (l *Lexer) skipWhiteSpace() {
 	for isWhitespace(l.ch) {
 		l.readChar()
 	}
@@ -66,21 +73,45 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '=':
-		tok = newToken(token.ASSIGN, l.ch)
+		if l.peekChar() == '=' {
+			tok.Type = token.EQ
+			tok.Literal = "=="
+			l.readChar()
+		} else {
+			tok = newToken(token.ASSIGN, l.ch)
+		}
 	case '+':
 		tok = newToken(token.PLUS, l.ch)
 	case '-':
 		tok = newToken(token.MINUS, l.ch)
 	case '!':
-		tok = newToken(token.BANG, l.ch)
+		if l.peekChar() == '=' {
+			tok.Type = token.NEQ
+			tok.Literal = "!="
+			l.readChar()
+		} else {
+			tok = newToken(token.BANG, l.ch)
+		}
 	case '/':
 		tok = newToken(token.SLASH, l.ch)
 	case '*':
 		tok = newToken(token.ASTERISK, l.ch)
 	case '<':
-		tok = newToken(token.LT, l.ch)
+		if l.peekChar() == '=' {
+			tok.Type = token.LTE
+			tok.Literal = "<="
+			l.readChar()
+		} else {
+			tok = newToken(token.LT, l.ch)
+		}
 	case '>':
-		tok = newToken(token.GT, l.ch)
+		if l.peekChar() == '=' {
+			tok.Type = token.GTE
+			tok.Literal = ">="
+			l.readChar()
+		} else {
+			tok = newToken(token.GT, l.ch)
+		}
 	case ';':
 		tok = newToken(token.SEMICOLON, l.ch)
 	case '(':
