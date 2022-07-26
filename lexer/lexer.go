@@ -25,6 +25,7 @@ func (l *Lexer) readChar() (ret rune) {
 		l.ch = r
 		l.input = l.input[size:]
 	} else {
+		ret = l.ch
 		l.ch = 0
 	}
 

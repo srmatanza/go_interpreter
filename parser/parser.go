@@ -12,10 +12,10 @@ import (
 const (
 	_ int = iota
 	LOWEST
-	EQUALS  // ==
+	EQUALS  // ==, !=
 	LTEGTE  // <, >, <=, >=
-	SUM     // +
-	PRODUCT // *
+	SUM     // +, -
+	PRODUCT // *, /
 	PREFIX  // -X or !X
 	CALL    // myFunc(X)
 )
@@ -211,7 +211,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	leftExp := prefixFn()
 
-	for !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekPrecedence() {
+	for !p.peekTokenIs(token.SEMICOLON) && !p.peekTokenIs(token.EOF) && precedence < p.peekPrecedence() {
 		infixFn := p.infixParseFns[p.peekToken.Type]
 		if infixFn == nil {
 			return leftExp
