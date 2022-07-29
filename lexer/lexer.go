@@ -18,55 +18,6 @@ func New(input string) *Lexer {
 	return lexer
 }
 
-func (l *Lexer) readChar() (ret rune) {
-	if len(l.input) > 0 {
-		r, size := utf8.DecodeRuneInString(l.input)
-		ret = l.ch
-		l.ch = r
-		l.input = l.input[size:]
-	} else {
-		ret = l.ch
-		l.ch = 0
-	}
-
-	return ret
-}
-
-func (l *Lexer) peekChar() (ret rune) {
-	if len(l.input) > 0 {
-		ret, _ = utf8.DecodeRuneInString(l.input)
-	}
-	return
-}
-
-func (l *Lexer) readIdentifier() (ret string) {
-	for unicode.IsLetter(l.ch) {
-		ret += string(l.readChar())
-	}
-	return
-}
-
-func (l *Lexer) readNumber() (ret string) {
-	for unicode.IsNumber(l.ch) {
-		ret += string(l.readChar())
-	}
-	return
-}
-
-func (l *Lexer) skipWhiteSpace() {
-	for isWhitespace(l.ch) {
-		l.readChar()
-	}
-}
-
-func isWhitespace(r rune) bool {
-	if r == '\n' || r == '\r' || r == ' ' || r == '\t' {
-		return true
-	}
-
-	return false
-}
-
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
@@ -148,6 +99,55 @@ func (l *Lexer) NextToken() token.Token {
 
 	l.readChar()
 	return tok
+}
+
+func (l *Lexer) readChar() (ret rune) {
+	if len(l.input) > 0 {
+		r, size := utf8.DecodeRuneInString(l.input)
+		ret = l.ch
+		l.ch = r
+		l.input = l.input[size:]
+	} else {
+		ret = l.ch
+		l.ch = 0
+	}
+
+	return ret
+}
+
+func (l *Lexer) peekChar() (ret rune) {
+	if len(l.input) > 0 {
+		ret, _ = utf8.DecodeRuneInString(l.input)
+	}
+	return
+}
+
+func (l *Lexer) readIdentifier() (ret string) {
+	for unicode.IsLetter(l.ch) {
+		ret += string(l.readChar())
+	}
+	return
+}
+
+func (l *Lexer) readNumber() (ret string) {
+	for unicode.IsNumber(l.ch) {
+		ret += string(l.readChar())
+	}
+	return
+}
+
+func (l *Lexer) skipWhiteSpace() {
+	for isWhitespace(l.ch) {
+		l.readChar()
+	}
+}
+
+func isWhitespace(r rune) bool {
+	if r == '\n' || r == '\r' || r == ' ' || r == '\t' {
+		return true
+	}
+
+	return false
 }
 
 func newToken(tokenType token.TokenType, ch rune) token.Token {

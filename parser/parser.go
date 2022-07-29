@@ -83,6 +83,20 @@ func New(l *lexer.Lexer) *Parser {
 	return p
 }
 
+func (p *Parser) ParseProgram() *ast.Program {
+	program := &ast.Program{}
+	program.Statements = []ast.Statement{}
+	for p.currentToken.Type != token.EOF {
+		statement := p.parseStatement()
+		if statement != nil {
+			program.Statements = append(program.Statements, statement)
+		}
+		p.nextToken()
+	}
+
+	return program
+}
+
 func (p *Parser) currentPrecedence() int {
 	if precedence, ok := precedences[p.currentToken.Type]; ok {
 		return precedence
@@ -168,20 +182,6 @@ func (p *Parser) peekError(t token.TokenType) {
 func (p *Parser) nextToken() {
 	p.currentToken = p.peekToken
 	p.peekToken = p.lexer.NextToken()
-}
-
-func (p *Parser) ParseProgram() *ast.Program {
-	program := &ast.Program{}
-	program.Statements = []ast.Statement{}
-	for p.currentToken.Type != token.EOF {
-		statement := p.parseStatement()
-		if statement != nil {
-			program.Statements = append(program.Statements, statement)
-		}
-		p.nextToken()
-	}
-
-	return program
 }
 
 func (p *Parser) parseStatement() ast.Statement {
