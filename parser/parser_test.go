@@ -240,6 +240,34 @@ func TestFunctionLiteralExpression(t *testing.T) {
 	testInfixExpression(t, bodyStatement.Expression, "x", "+", "y")
 }
 
+func TestFunctionParameterParsing(t *testing.T) {
+	tests := []struct {
+		input          string
+		expectedParams []string
+	}{
+		{"fn() {};", []string{}},
+		{"fn(x) {};", []string{"x"}},
+		{"fn(x, y, z) {};", []string{"x", "y", "z"}},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		statement := program.Statements[0].(*ast.ExpressionStatement)
+		function := statement.Expression.(*ast.FunctionLiteral)
+		if len(function.Parameters) != len(tt.expectedParams) {
+			t.Errorf("length parameters wrong: %v", tt.expectedParams)
+		}
+
+		for i, ident := range tt.expectedParams {
+			testLiteralExpression(t, function.Parameters[i], ident)
+		}
+	}
+}
+
 func TestParsingPrefixExpression(t *testing.T) {
 	prefixTests := []struct {
 		input    string
