@@ -207,6 +207,39 @@ func TestIfExpression(t *testing.T) {
 	}
 }
 
+func TestFunctionLiteralExpression(t *testing.T) {
+	input := `fn(x, y) { x + y; }`
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements is the wrong length")
+	}
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement")
+	}
+	function, ok := statement.Expression.(*ast.FunctionLiteral)
+	if !ok {
+		t.Fatalf("statement.Expression is not ast.FunctionLiteral")
+	}
+	if len(function.Parameters) != 2 {
+		t.Fatalf("function literal parameters is wrong")
+	}
+	testLiteralExpression(t, function.Parameters[0], "x")
+	testLiteralExpression(t, function.Parameters[1], "y")
+
+	if len(function.Body.Statements) != 1 {
+		t.Fatalf("function.Body.Statements is the wrong length")
+	}
+	bodyStatement, ok := function.Body.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("function body statement is not ast.ExpressionStatement")
+	}
+	testInfixExpression(t, bodyStatement.Expression, "x", "+", "y")
+}
+
 func TestParsingPrefixExpression(t *testing.T) {
 	prefixTests := []struct {
 		input    string
